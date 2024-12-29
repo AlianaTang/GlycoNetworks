@@ -9,8 +9,8 @@ const double defaultMassTolerance = 0.02;
 if (args.Length < 2 || args.Length > 4)
 {
     Console.WriteLine("Usage: GlycoNet <Spectra file path> <Glycan database file path> [Deltas] [Mass tolerance]");
-    Console.WriteLine("  <Spectra file path> is mandatory");
-    Console.WriteLine("  <Glycan database file path> is mandatory");
+    Console.WriteLine("  <Spectra file path> is mandatory. Must be in MGF format");
+    Console.WriteLine("  <Glycan database file path> is mandatory. Must be a text file of glycan compositions");
     Console.WriteLine("  [Deltas] is optional. List of glycan deltas to consider, separated by commas");
     Console.WriteLine("    Available glycan deltas are: " + String.Join(",", Constants.glycan_masses.Keys));
     Console.WriteLine("    Default is: " + defaultDeltas);
@@ -108,7 +108,7 @@ using (var gnuplotConvenienceFile = new StreamWriter(Path.Combine(spectraDirecto
                     glycopepList.Add(glycopep);
 
                     string gnuplotSpectrumFileName = Path.Combine(spectraDirectory, @"spectra - " + spectraFileName + @"\rt" + (spectra[i].Rt / 60).ToString("F4") + ".txt");
-                    gnuplotConvenienceFile.WriteLine("load '" + gnuplotSpectrumFileName + "'; pause -1");
+                    gnuplotConvenienceFile.WriteLine("load '" + Path.GetFileName(gnuplotSpectrumFileName) + "'; pause -1");
 
                     using (var gnuplotSpectrumFile = new StreamWriter(gnuplotSpectrumFileName))
                     {
