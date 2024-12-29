@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "GlycoNet": {
-      "commandName": "Project",
-      "commandLineArgs": "\"C:\\GlycanTestData\\HF01_20171017_QXH_LXY_2017YFF0205400_GIgM_F1_R1.pd.mgf\" \"C:\\Program Files\\ProteinMetrics\\PMI-Suite\\Tools\\Byonic\\data\\GlycanDatabases\\N-glycan 182 human no multiple fucose.txt\" \"Hex,HexNAc,Fuc,NeuAc,Hex-HexNAc,Phospho\" 0.02"
-    }
-  }
-}
