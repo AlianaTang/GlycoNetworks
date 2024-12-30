@@ -107,7 +107,7 @@ using (var gnuplotConvenienceFile = new StreamWriter(Path.Combine(spectraDirecto
                     glycopep.intensity = pepMz.intensity;
                     glycopepList.Add(glycopep);
 
-                    string gnuplotSpectrumFileName = Path.Combine(spectraDirectory, @"spectra - " + spectraFileName + @"\rt" + (spectra[i].Rt / 60).ToString("F4") + ".txt");
+                    string gnuplotSpectrumFileName = Path.Combine(spectraDirectory, @"spectra - " + spectraFileName + @"\rt=" + (spectra[i].Rt / 60).ToString("F4") + "_mz=" + spectra[i].PrecursorMz.ToString("F4") + ".txt");
                     gnuplotConvenienceFile.WriteLine("load '" + Path.GetFileName(gnuplotSpectrumFileName) + "'; pause -1");
 
                     using (var gnuplotSpectrumFile = new StreamWriter(gnuplotSpectrumFileName))
