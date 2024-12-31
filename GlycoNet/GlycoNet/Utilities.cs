@@ -11,43 +11,48 @@ namespace GlycoNet
 {
     internal static class Utilities
     {
-        public static List<MS2> readMgf(string inputfilename)
+        public static List<MS2> readMgfAndFindGlycopeptides(string inputfilename)
         {
-            string[] lines = File.ReadAllLines(inputfilename);
             var spectra = new List<MS2>();
-
-            int count = -1;
-
-            for (int i = 0; i < lines.Length; i++)
+            var spectrum = new MS2(); ;
+            string line;
+            using (var streamReader = new StreamReader(inputfilename))
             {
-                if (lines[i] == "BEGIN IONS")
+                while ((line = streamReader.ReadLine()) != null)
                 {
-                    spectra.Add(new MS2());
-                    count++;
-                }
-                else if (lines[i].Split('=')[0] == "TITLE")
-                {
-
-                }
-                else if (lines[i].Split('=')[0] == "RTINSECONDS")
-                {
-                    spectra[count].Rt = Convert.ToDouble(lines[i].Split('=')[1]);
-                }
-                else if (lines[i].Split('=')[0] == "PEPMASS")
-                {
-                    spectra[count].PrecursorMz = Convert.ToDouble(lines[i].Split('=')[1].Split(' ')[0]);
-                }
-                else if (lines[i].Split('=')[0] == "CHARGE")
-                {
-                    spectra[count].Charge = Int32.Parse(lines[i].Split('=')[1].Split('+')[0]);
-                }
-                else if (lines[i] == "END IONS")
-                {
-
-                }
-                else if (Double.TryParse(lines[i].Split(' ')[0], out double mass) && Double.TryParse(lines[i].Split(' ')[1], out double intensity))
-                {
-                    spectra[count].AddData(mass, intensity);
+                    line = line.Trim();
+                    if (line == "BEGIN IONS")
+                    {
+                        spectrum = new MS2();
+                    }
+                    else if (line.Split('=')[0] == "RTINSECONDS")
+                    {
+                        spectrum.Rt = Convert.ToDouble(line.Split('=')[1]);
+                    }
+                    else if (line.Split('=')[0] == "PEPMASS")
+                    {
+                        spectrum.PrecursorMz = Convert.ToDouble(line.Split('=')[1].Split(' ')[0]);
+                    }
+                    else if (line.Split('=')[0] == "CHARGE")
+                    {
+                        spectrum.Charge = Int32.Parse(line.Split('=')[1].Split('+')[0]);
+                    }
+                    else if (line == "END IONS")
+                    {
+                        if (spectrum.hasGlycanOxoniumIon())
+                        {
+                            spectrum.sortPeaksByIntensity();
+                            Point? pepMz = spectrum.findGlycopep();  // Look for pep, pep+HexNAc, pep+2HexNAc, etc. signature
+                            if (pepMz != null && pepMz.mass > 0)
+                            {
+                                spectra.Add(spectrum);
+                            }
+                        }
+                    }
+                    else if (Double.TryParse(line.Split(' ')[0], out double mass) && Double.TryParse(line.Split(' ')[1], out double intensity))
+                    {
+                        spectrum.AddData(mass, intensity);
+                    }
                 }
             }
             return spectra;

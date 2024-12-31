@@ -60,13 +60,10 @@ Directory.CreateDirectory(Path.Combine(spectraDirectory, ("graphs - " + spectraF
 
 List<GlycanComposition> compositions = Utilities.readGlycanDatabase(glycanDatabaseFilePath);
 
-List<MS2> spectra = Utilities.readMgf(Path.Combine(spectraDirectory, spectraFileName));
+List<MS2> spectra = Utilities.readMgfAndFindGlycopeptides(Path.Combine(spectraDirectory, spectraFileName));
 var glycanMasses = new List<double>();
 var glycopepList = new List<Glycopep>();  // Retention time, Charge, Precursor Mz, Precursor Mass, Peptide Mass, Glycan Mass, Intensity, [Hexes, HexNacs, Fucs, NeuAcs, NeuGcs]*
 var commonGlycans = new List<GlycInfo>();
-
-int numer = 0;
-int denom = 0;
 
 var mapGlycantoPepList = new Dictionary<double, List<Glycopep>>(); //glycmass, list of pepmasses
 var mapPeptoGlycanList = new Dictionary<double, List<Glycopep>>(); //used to be double, PepInfo2
@@ -81,74 +78,62 @@ using (var gnuplotConvenienceFile = new StreamWriter(Path.Combine(spectraDirecto
 
         for (int i = 0; i < spectra.Count; i++)
         {
-            if (spectra[i].hasGlycanOxoniumIon())
+            Point? pepMz = spectra[i].findGlycopep();  // Look for pep, pep+HexNAc, pep+2HexNAc, etc. signature
+            if (pepMz != null && pepMz.mass > 0)
             {
-                denom++;
-                spectra[i].sortPeaksByIntensity();
-                Point? pepMz = spectra[i].findGlycopep();  // Look for pep, pep+HexNAc, pep+2HexNAc, etc. signature
-                if (pepMz.mass > 0)
+                double pepMass = Utilities.mzToMass(pepMz.mass, spectra[i].returnBarePepCharge());
+                double glycMass = Utilities.mzToMass(spectra[i].PrecursorMz, spectra[i].Charge) - pepMass;
+                glycanMasses.Add(glycMass);
+
+                spectraSummaryCsvFile.WriteLine((spectra[i].Rt / 60).ToString("F4") + "," + spectra[i].Charge + "," + spectra[i].PrecursorMz + ","
+                    + Utilities.mzToMass(spectra[i].PrecursorMz, spectra[i].Charge) + "," + pepMass + ","
+                    + glycMass + "," + pepMz.intensity);
+
+                Glycopep glycopep = new Glycopep();
+                glycopep.rt = Convert.ToDouble((spectra[i].Rt / 60).ToString("F4"));
+                glycopep.charge = spectra[i].Charge;
+                glycopep.precursorMz = spectra[i].PrecursorMz;
+                glycopep.precursorMass = Utilities.mzToMass(spectra[i].PrecursorMz, spectra[i].Charge);
+                glycopep.peptideMass = pepMass;
+                glycopep.glycanMass = glycMass;
+                glycopep.intensity = pepMz.intensity;
+                glycopepList.Add(glycopep);
+
+                string gnuplotSpectrumFileName = Path.Combine(spectraDirectory, @"spectra - " + spectraFileName + @"\rt=" + (spectra[i].Rt / 60).ToString("F4") + "_mz=" + spectra[i].PrecursorMz.ToString("F4") + ".txt");
+                gnuplotConvenienceFile.WriteLine("load '" + Path.GetFileName(gnuplotSpectrumFileName) + "'; pause -1");
+
+                using (var gnuplotSpectrumFile = new StreamWriter(gnuplotSpectrumFileName))
                 {
-                    double pepMass = Utilities.mzToMass(pepMz.mass, spectra[i].returnBarePepCharge());
-                    double glycMass = Utilities.mzToMass(spectra[i].PrecursorMz, spectra[i].Charge) - pepMass;
-                    glycanMasses.Add(glycMass);
-                    numer++;
+                    string plotTitle = @"Retention time: " + spectra[i].Rt / 60 + @"\nCharge: " + spectra[i].Charge + @"\nPrecursor m/z: " + spectra[i].PrecursorMz;
+                    gnuplotSpectrumFile.WriteLine("unset key\nset title \"" + plotTitle + "\"\nplot '-' with impulse linewidth 2 linetype - 1, '-' with impulse linewidth 2 linetype 7, '-' with impulse linewidth 2 linetype 17");
 
-                    spectraSummaryCsvFile.WriteLine((spectra[i].Rt / 60).ToString("F4") + "," + spectra[i].Charge + "," + spectra[i].PrecursorMz + ","
-                        + Utilities.mzToMass(spectra[i].PrecursorMz, spectra[i].Charge) + "," + pepMass + ","
-                        + glycMass + "," + pepMz.intensity);
-
-                    Glycopep glycopep = new Glycopep();
-                    glycopep.rt = Convert.ToDouble((spectra[i].Rt / 60).ToString("F4"));
-                    glycopep.charge = spectra[i].Charge;
-                    glycopep.precursorMz = spectra[i].PrecursorMz;
-                    glycopep.precursorMass = Utilities.mzToMass(spectra[i].PrecursorMz, spectra[i].Charge);
-                    glycopep.peptideMass = pepMass;
-                    glycopep.glycanMass = glycMass;
-                    glycopep.intensity = pepMz.intensity;
-                    glycopepList.Add(glycopep);
-
-                    string gnuplotSpectrumFileName = Path.Combine(spectraDirectory, @"spectra - " + spectraFileName + @"\rt=" + (spectra[i].Rt / 60).ToString("F4") + "_mz=" + spectra[i].PrecursorMz.ToString("F4") + ".txt");
-                    gnuplotConvenienceFile.WriteLine("load '" + Path.GetFileName(gnuplotSpectrumFileName) + "'; pause -1");
-
-                    using (var gnuplotSpectrumFile = new StreamWriter(gnuplotSpectrumFileName))
+                    // Draw spectrum in black in gnuplot
+                    for (int j = 0; j < spectra[i].findLen(); j++)
                     {
-                        string plotTitle = @"Retention time: " + spectra[i].Rt / 60 + @"\nCharge: " + spectra[i].Charge + @"\nPrecursor m/z: " + spectra[i].PrecursorMz;
-                        gnuplotSpectrumFile.WriteLine("unset key\nset title \"" + plotTitle + "\"\nplot '-' with impulse linewidth 2 linetype - 1, '-' with impulse linewidth 2 linetype 7, '-' with impulse linewidth 2 linetype 17");
+                        gnuplotSpectrumFile.WriteLine((spectra[i].GetMass(j)).ToString("F4") + " " + (spectra[i].GetIntensity(j)).ToString("F4"));
+                    }
 
-                        // Draw spectrum in black in gnuplot
-                        for (int j = 0; j < spectra[i].findLen(); j++)
-                        {
-                            gnuplotSpectrumFile.WriteLine((spectra[i].GetMass(j)).ToString("F4") + " " + (spectra[i].GetIntensity(j)).ToString("F4"));
-                        }
+                    spectra[i].sortPeaksByIntensity();
 
-                        spectra[i].sortPeaksByIntensity();
+                    // Make the pep, pep+HexNAc, pep+2HexNAc, pep+2HexNAc+Hex peaks red in gnuplot
+                    Point plusHexnac = spectra[i].returnHexnac();
+                    Point plus2Hexnac = spectra[i].return2Hexnac();
+                    Point plusHex2Hexnac = spectra[i].returnHex2Hexnac();
+                    gnuplotSpectrumFile.WriteLine("\n\ne\n\n" + pepMz.mass.ToString("F4") + " " + pepMz.intensity);
+                    gnuplotSpectrumFile.WriteLine(plusHexnac.mass + " " + plusHexnac.intensity);
+                    gnuplotSpectrumFile.WriteLine(plus2Hexnac.mass + " " + plus2Hexnac.intensity);
+                    gnuplotSpectrumFile.WriteLine(plusHex2Hexnac.mass + " " + plusHex2Hexnac.intensity);
+                    gnuplotSpectrumFile.WriteLine("# " + (spectra[i].Rt / 60).ToString("F4"));
 
-                        // Make the pep, pep+HexNAc, pep+2HexNAc, pep+2HexNAc+Hex peaks red in gnuplot
-                        Point plusHexnac = spectra[i].returnHexnac();
-                        Point plus2Hexnac = spectra[i].return2Hexnac();
-                        Point plusHex2Hexnac = spectra[i].returnHex2Hexnac();
-                        gnuplotSpectrumFile.WriteLine("\n\ne\n\n" + pepMz.mass.ToString("F4") + " " + pepMz.intensity);
-                        gnuplotSpectrumFile.WriteLine(plusHexnac.mass + " " + plusHexnac.intensity);
-                        gnuplotSpectrumFile.WriteLine(plus2Hexnac.mass + " " + plus2Hexnac.intensity);
-                        gnuplotSpectrumFile.WriteLine(plusHex2Hexnac.mass + " " + plusHex2Hexnac.intensity);
-                        gnuplotSpectrumFile.WriteLine("# " + (spectra[i].Rt / 60).ToString("F4"));
-
-                        // Make the 204 and 366 peaks purple in gnuplot
-                        gnuplotSpectrumFile.WriteLine("\n\ne\n\n" + Constants.glycan_masses["HexNAc"] + Constants.adduct + " " + spectra[i].corrIntensity(Constants.glycan_masses["HexNAc"] + Constants.adduct));
-                        gnuplotSpectrumFile.WriteLine(Constants.glycan_masses["HexNAc"] + Constants.glycan_masses["Hex"] + Constants.adduct + " " + spectra[i].corrIntensity(Constants.glycan_masses["HexNAc"] + Constants.glycan_masses["Hex"] + Constants.adduct));
-                        gnuplotSpectrumFile.WriteLine("\n\ne\n\n");
-                    }   
+                    // Make the 204 and 366 peaks purple in gnuplot
+                    gnuplotSpectrumFile.WriteLine("\n\ne\n\n" + Constants.glycan_masses["HexNAc"] + Constants.adduct + " " + spectra[i].corrIntensity(Constants.glycan_masses["HexNAc"] + Constants.adduct));
+                    gnuplotSpectrumFile.WriteLine(Constants.glycan_masses["HexNAc"] + Constants.glycan_masses["Hex"] + Constants.adduct + " " + spectra[i].corrIntensity(Constants.glycan_masses["HexNAc"] + Constants.glycan_masses["Hex"] + Constants.adduct));
+                    gnuplotSpectrumFile.WriteLine("\n\ne\n\n");
                 }
             }
         }
     }
 }
-
-Console.WriteLine();
-Console.WriteLine("Potential glycopeptide spectra found / # spectra with 204, 366:");
-Console.WriteLine(numer + "/" + denom + " or " + Convert.ToDouble(numer) / denom);
-Console.WriteLine();
-
 
 CompareGlycan glycans = new CompareGlycan();
 

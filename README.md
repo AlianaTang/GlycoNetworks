@@ -25,11 +25,8 @@ Example command for running GlycoNet on this test dataset:
 ```
 GlycoNet "HF01_20171017_QXH_LXY_2017YFF0205400_GIgM_F1_R1.pd.mgf" "N-glycan 182 human no multiple fucose.txt" Hex,HexNAc,Fuc,NeuAc,Hex-HexNAc 0.015
 ```
-The console output shows summary statistics and the additional glycans found by GlycoNet:
+The console output shows the additional glycans found by GlycoNet:
 ```
-Potential glycopeptide spectra found / # spectra with 204, 366:
-474/13457 or 0.03522330385672884
-
 Additional glycans:
 HexNAc(5)Hex(7)NeuAc(1)
 HexNAc(5)Hex(8)NeuAc(1)
