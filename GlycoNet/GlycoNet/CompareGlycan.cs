@@ -19,7 +19,7 @@ namespace GlycoNet
         //public Dictionary<double, List<double>> graph2 = new Dictionary<double, List<double>>();
         //public List<double> visited2 = new List<double>();
 
-        public Dictionary<Glycopep, List<Edge>> graph3 = new Dictionary<Glycopep, List<Edge>>();
+        //public Dictionary<Glycopep, List<Edge>> graph3 = new Dictionary<Glycopep, List<Edge>>();
 
         public List<String> compList = new List<String>();
         public double calcHex(string composition)
@@ -128,7 +128,7 @@ namespace GlycoNet
             return (Array.FindIndex(graph.Keys.ToArray(), ele => Math.Abs(ele.glycanMass - keyGlycMass) <= Constants.tolerance && Math.Abs(ele.peptideMass - keyPepMass) <= Constants.tolerance));
         }
 
-        public string writeEdge(int biggerIndex, int smallerIndex, double glycan_mass, string labelname, List<Glycopep> glycopeptides)
+        public string writeEdge(int biggerIndex, int smallerIndex, double glycan_mass, string labelname, List<Glycopep> glycopeptides, Dictionary<Glycopep, List<Edge>> graph)
         {   
             string edge_code = "";
             double bigger = glycopeptides[biggerIndex].glycanMass;
@@ -186,8 +186,8 @@ namespace GlycoNet
                 edge2.glycDiff = labelname;
                 edge2.increasing = 1;
 
-                graph3[glycopep1].Add(edge1);
-                graph3[glycopep2].Add(edge2);
+                graph[glycopep1].Add(edge1);
+                graph[glycopep2].Add(edge2);
             }
             /*
             else

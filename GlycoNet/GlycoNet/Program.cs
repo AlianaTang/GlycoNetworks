@@ -70,6 +70,9 @@ var mapPeptoGlycanList = new Dictionary<double, List<Glycopep>>(); //used to be 
 
 var uniqueGlycansGlycopepList = new List<Glycopep>();
 
+var graph2 = new Dictionary<Glycopep, List<Edge>>();
+var graph3 = new Dictionary<Glycopep, List<Edge>>();
+
 using (var gnuplotConvenienceFile = new StreamWriter(Path.Combine(spectraDirectory, ("spectra - " + spectraFileName + @"\all.txt"))))
 {
     using (var spectraSummaryCsvFile = new StreamWriter(Path.Combine(spectraDirectory, (spectraFileName + " - spectra summary.csv"))))
@@ -234,7 +237,6 @@ for (int i = 0; i < mapGlycantoPepList.Count; i++)
     uniqueGlycansGlycopepList.Add(mapGlycantoPepList[keyVal][0]);
 }
 
-/*
 using (var glycanGraphFile = new StreamWriter(Path.Combine(spectraDirectory, @"glycan graph - " + spectraFileName + ".gml")))
 {
     glycanGraphFile.WriteLine("Creator \"yFiles\"\nVersion 2.2\ngraph\n[ hierarchic  1\n  directed  1  ");
@@ -257,6 +259,8 @@ using (var glycanGraphFile = new StreamWriter(Path.Combine(spectraDirectory, @"g
             glycanGraphFile.WriteLine("    [ fill	\"#4287F5\" ]");
         }
         glycanGraphFile.WriteLine("  ]");
+
+        graph2.Add(uniqueGlycansGlycopepList[i], new List<Edge>());
     }
 
     for (int i = 0; i < uniqueGlycansGlycopepList.Count; i++)
@@ -276,20 +280,15 @@ using (var glycanGraphFile = new StreamWriter(Path.Combine(spectraDirectory, @"g
                 smallerIndex = i;
             }
 
-            glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses["Hex"], "Hex", uniqueGlycansGlycopepList));
-            glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses["HexNAc"], "HexNAc", uniqueGlycansGlycopepList));
-            glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses["Fuc"], "Fuc", uniqueGlycansGlycopepList));
-            glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses["NeuAc"], "NeuAc", uniqueGlycansGlycopepList));
-            //glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses["NeuGc"], "NeuGc", uniqueGlycansGlycopepList));
-            glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses["Hex-HexNAc"], "Hex-HexNAc", uniqueGlycansGlycopepList));
-            //glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses["Pent"], "Pent", uniqueGlycansGlycopepList));
-            glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses["Phospho"], "Phospho", uniqueGlycansGlycopepList));
+            foreach (string delta in deltas)
+            {
+                glycanGraphFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses[delta], delta, uniqueGlycansGlycopepList, graph2));
+            }
         }
     }
 
     glycanGraphFile.WriteLine("]");
 }
-*/
 
 for (int k = 0; k < mapPeptoGlycanList.Count; k++)
 {
@@ -324,7 +323,7 @@ for (int k = 0; k < mapPeptoGlycanList.Count; k++)
             //key.peptideMass = keyVal;
             //key.comp = GlycanComposition.toComp(label);
 
-            glycans.graph3.Add(mapPeptoGlycanList[keyVal][i], new List<Edge>());
+            graph3.Add(mapPeptoGlycanList[keyVal][i], new List<Edge>());
         }
         
         for (int i = 0; i < len; i++)
@@ -348,7 +347,7 @@ for (int k = 0; k < mapPeptoGlycanList.Count; k++)
 
                 foreach (string delta in deltas)
                 {
-                    glycanGraphSpecificPeptideFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses[delta], delta, list));
+                    glycanGraphSpecificPeptideFile.Write(glycans.writeEdge(biggerIndex, smallerIndex, Constants.glycan_masses[delta], delta, list, graph3));
                 }
             }
         }
@@ -366,10 +365,10 @@ using (var additionalGlycansFile = new StreamWriter(Path.Combine(spectraDirector
         for (int i = 0; i < glycopepList.Count; i++)
         {
             glycans.visited.Clear();
-            glycans.dfs2(glycans.graph3, glycopepList[i], Constants.tolerance, glycans.visited);
+            glycans.dfs2(graph3, glycopepList[i], Constants.tolerance, glycans.visited);
             if (glycopepList[i].comp != null && glycans.visited.Count >= 3)
             {
-                foreach (Edge edge in glycans.graph3[glycopepList[i]])
+                foreach (Edge edge in graph3[glycopepList[i]])
                 {
                     if (edge.target.comp == null)
                     {
