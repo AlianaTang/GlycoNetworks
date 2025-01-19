@@ -3,45 +3,26 @@
 using GlycoNet;
 using System.Collections.Generic;
 
-const string defaultDeltas = "Hex,HexNAc,Fuc,NeuAc,Hex-HexNAc";
 const double defaultMassTolerance = 0.02;
 
 if (args.Length < 2 || args.Length > 4)
 {
-    Console.WriteLine("Usage: GlycoNet <Spectra file path> <Glycan database file path> [Deltas] [Mass tolerance]");
+    Console.WriteLine("Usage: GlycoNet <Spectra file path> <Glycan database file path> [Mass tolerance] [Deltas]");
     Console.WriteLine("  <Spectra file path> is mandatory. Must be in MGF format");
     Console.WriteLine("  <Glycan database file path> is mandatory. Must be a text file of glycan compositions");
-    Console.WriteLine("  [Deltas] is optional. List of glycan deltas to consider, separated by commas");
-    Console.WriteLine("    Available glycan deltas are: " + String.Join(",", Constants.glycan_masses.Keys));
-    Console.WriteLine("    Default is: " + defaultDeltas);
     Console.WriteLine("  [Mass tolerance] is optional. Default is: " + defaultMassTolerance);
+    Console.WriteLine("  [Deltas] is optional. List of glycan deltas to consider, separated by commas");
+    Console.WriteLine("    Default is: all building blocks found in the glycan database, along with the disaccharide Hex-HexNAc");
+    Console.WriteLine("    This program knows the following deltas: " + String.Join(",", Constants.glycan_masses.Keys));
     return;
 }
 
 string spectraFilePath = args[0];
 string glycanDatabaseFilePath = args[1];
 
-string[] deltas;
 if (args.Length >= 3)
 {
-    deltas = args[2].Split(",");
-}
-else
-{
-    deltas = defaultDeltas.Split(",");
-}
-foreach (string delta in deltas)
-{
-    if (!Constants.glycan_masses.ContainsKey(delta))
-    {
-        Console.WriteLine("Error: Invalid delta");
-        return;
-    }
-}
-
-if (args.Length >= 4)
-{
-    if (!Double.TryParse(args[3], out Constants.tolerance))
+    if (!Double.TryParse(args[2], out Constants.tolerance))
     {
         Console.WriteLine("Error: Could not parse mass tolerance");
         return;
@@ -52,6 +33,20 @@ else
     Constants.tolerance = defaultMassTolerance;
 }
 
+string[]? deltas = null;
+if (args.Length >= 4)
+{
+    deltas = args[3].Split(",");
+    foreach (string delta in deltas)
+    {
+        if (!Constants.glycan_masses.ContainsKey(delta))
+        {
+            Console.WriteLine("Error: Invalid delta");
+            return;
+        }
+    }
+}
+
 string spectraFileName = Path.GetFileName(spectraFilePath);
 string spectraDirectory = Path.GetDirectoryName(spectraFilePath);
 
@@ -59,6 +54,29 @@ Directory.CreateDirectory(Path.Combine(spectraDirectory, ("spectra - " + spectra
 Directory.CreateDirectory(Path.Combine(spectraDirectory, ("graphs - " + spectraFileName)));
 
 List<GlycanComposition> compositions = Utilities.readGlycanDatabase(glycanDatabaseFilePath);
+if (deltas == null)
+{
+    var deltasHashSet = new HashSet<string>();
+    foreach (GlycanComposition composition in compositions)
+    {
+        foreach (string delta in composition.Keys)
+        {
+            deltasHashSet.Add(delta);
+        }
+    }
+    if (deltasHashSet.Contains("Hex") && deltasHashSet.Contains("HexNAc"))
+    {
+        deltasHashSet.Add("Hex-HexNAc");
+    }
+    deltas = deltasHashSet.ToArray();
+}
+Console.Write("Deltas: ");
+foreach (string delta in deltas)
+{
+    Console.Write("\t" + delta);
+}
+Console.WriteLine();
+Console.WriteLine();
 
 List<MS2> spectra = Utilities.readMgfAndFindGlycopeptides(Path.Combine(spectraDirectory, spectraFileName));
 var glycanMasses = new List<double>();

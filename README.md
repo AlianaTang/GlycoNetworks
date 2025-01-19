@@ -8,13 +8,13 @@ More details can be found in the paper "Network method for building a sample-spe
 
 GlycoNet is a command line tool.
 ```
-Usage: GlycoNet <Spectra file path> <Glycan database file path> [Deltas] [Mass tolerance]
+Usage: GlycoNet <Spectra file path> <Glycan database file path> [Mass tolerance] [Deltas]
   <Spectra file path> is mandatory. Must be in MGF format
   <Glycan database file path> is mandatory. Must be a text file of glycan compositions
-  [Deltas] is optional. List of glycan deltas to consider, separated by commas
-    Available glycan deltas are: Hex,HexNAc,Fuc,NeuAc,NeuGc,Pent,Phospho,Na,Acetyl,Hex-HexNAc
-    Default is: Hex,HexNAc,Fuc,NeuAc,Hex-HexNAc
   [Mass tolerance] is optional. Default is: 0.02
+  [Deltas] is optional. List of glycan deltas to consider, separated by commas
+    Default is: all building blocks found in the glycan database, along with the disaccharide Hex-HexNAc
+    This program knows the following deltas: Hex,HexNAc,Fuc,NeuAc,NeuGc,Pent,Phospho,Na,Acetyl,Hex-HexNAc
   ```
 
 ## Usage example
@@ -23,10 +23,12 @@ The `GlycanTestData` folder has example data for testing. This data is from data
 
 Example command for running GlycoNet on this test dataset:
 ```
-GlycoNet "HF01_20171017_QXH_LXY_2017YFF0205400_GIgM_F1_R1.pd.mgf" "N-glycan 182 human no multiple fucose.txt" Hex,HexNAc,Fuc,NeuAc,Hex-HexNAc 0.015
+GlycoNet "HF01_20171017_QXH_LXY_2017YFF0205400_GIgM_F1_R1.pd.mgf" "N-glycan 182 human no multiple fucose.txt" 0.015 Hex,HexNAc,Fuc,NeuAc,Hex-HexNAc
 ```
 The console output shows the additional glycans found by GlycoNet:
 ```
+Deltas:         HexNAc  Hex     Fuc     NeuAc   Hex-HexNAc
+
 Additional glycans:
 HexNAc(5)Hex(7)NeuAc(1)
 HexNAc(5)Hex(8)NeuAc(1)
