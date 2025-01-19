@@ -70,12 +70,7 @@ if (deltas == null)
     }
     deltas = deltasHashSet.ToArray();
 }
-Console.Write("Deltas: ");
-foreach (string delta in deltas)
-{
-    Console.Write("\t" + delta);
-}
-Console.WriteLine();
+Console.WriteLine("Deltas: " + String.Join(",", deltas));
 Console.WriteLine();
 
 List<MS2> spectra = Utilities.readMgfAndFindGlycopeptides(Path.Combine(spectraDirectory, spectraFileName));

@@ -27,7 +27,7 @@ GlycoNet "HF01_20171017_QXH_LXY_2017YFF0205400_GIgM_F1_R1.pd.mgf" "N-glycan 182 
 ```
 The console output shows the additional glycans found by GlycoNet:
 ```
-Deltas:         HexNAc  Hex     Fuc     NeuAc   Hex-HexNAc
+Deltas: Hex,HexNAc,Fuc,NeuAc,Hex-HexNAc
 
 Additional glycans:
 HexNAc(5)Hex(7)NeuAc(1)
