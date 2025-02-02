@@ -2,13 +2,14 @@
 
 using GlycoNet;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 const double defaultMassTolerance = 0.02;
 
 if (args.Length < 2 || args.Length > 4)
 {
     Console.WriteLine("Usage: GlycoNet <Spectra file path> <Glycan database file path> [Mass tolerance] [Deltas]");
-    Console.WriteLine("  <Spectra file path> is mandatory. Must be in MGF format");
+    Console.WriteLine("  <Spectra file path> is mandatory. Must be in MGF format, or ConvertToMgf.bat must be configured to convert to MGF format");
     Console.WriteLine("  <Glycan database file path> is mandatory. Must be a text file of glycan compositions");
     Console.WriteLine("  [Mass tolerance] is optional. Default is: " + defaultMassTolerance);
     Console.WriteLine("  [Deltas] is optional. List of glycan deltas to consider, separated by commas");
@@ -17,7 +18,25 @@ if (args.Length < 2 || args.Length > 4)
     return;
 }
 
-string spectraFilePath = args[0];
+string spectraFilePath = Path.GetFullPath(args[0]);
+
+if (Path.GetExtension(spectraFilePath).ToLower() != ".mgf")
+{
+    var processStartInfo = new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "ConvertToMgf.bat"), spectraFilePath);
+    processStartInfo.UseShellExecute = false;
+    processStartInfo.CreateNoWindow = true;
+    processStartInfo.WorkingDirectory = Path.GetDirectoryName(spectraFilePath);
+    Process? process = Process.Start(processStartInfo);
+    process.WaitForExit();
+
+    spectraFilePath = Path.Combine(Path.GetDirectoryName(spectraFilePath), Path.GetFileNameWithoutExtension(spectraFilePath) + ".mgf");
+    if (!File.Exists(spectraFilePath))
+    {
+        Console.WriteLine("Error: Unable to convert " + args[0] + " to MGF format");
+        return;
+    }
+}
+
 string glycanDatabaseFilePath = args[1];
 
 if (args.Length >= 3)

@@ -9,7 +9,7 @@ More details can be found in the paper "Network method for building a sample-spe
 GlycoNet is a command line tool.
 ```
 Usage: GlycoNet <Spectra file path> <Glycan database file path> [Mass tolerance] [Deltas]
-  <Spectra file path> is mandatory. Must be in MGF format
+  <Spectra file path> is mandatory. Must be in MGF format, or ConvertToMgf.bat must be configured to convert to MGF format
   <Glycan database file path> is mandatory. Must be a text file of glycan compositions
   [Mass tolerance] is optional. Default is: 0.02
   [Deltas] is optional. List of glycan deltas to consider, separated by commas
