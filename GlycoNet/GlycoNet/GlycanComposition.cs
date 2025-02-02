@@ -61,5 +61,14 @@ namespace GlycoNet
             }
             return comp;
         }
+
+        public static bool Contains(List<GlycanComposition> list, GlycanComposition x)
+        {
+            foreach (GlycanComposition listItem in list)
+            {
+                if (x.toString() == listItem.toString()) return true;
+            }
+            return false;
+        }
     }
 }

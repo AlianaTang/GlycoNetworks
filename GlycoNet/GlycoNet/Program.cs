@@ -420,7 +420,7 @@ using (var additionalGlycansFile = new StreamWriter(Path.Combine(spectraDirector
                             if (!edge.target.comp.ContainsKey(edge.glycDiff)) edge.target.comp.Add(edge.glycDiff, 0);
                             edge.target.comp[edge.glycDiff] += edge.increasing;
                         }
-                        if (edge.target.comp.isValid())
+                        if (edge.target.comp.isValid() && !GlycanComposition.Contains(compositions, edge.target.comp))
                         {
                             string new_comp = edge.target.comp.toString();
                             additionalGlycansFile.WriteLine(new_comp + "," + edge.target.glycanMass + "," + glycans.visited.Count + "," + edge.target.peptideMass + "," + edge.target.rt);
