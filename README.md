@@ -29,6 +29,8 @@ The console output shows the additional glycans found by GlycoNet:
 ```
 Deltas: Hex,HexNAc,Fuc,NeuAc,Hex-HexNAc
 
+Number of spectra with glycopeptide oxonium ion and Y0, Y1, Y2, etc.: 474
+
 Additional glycans:
 HexNAc(5)Hex(7)NeuAc(1)
 HexNAc(5)Hex(8)NeuAc(1)
