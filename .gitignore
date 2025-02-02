@@ -1,0 +1,8 @@
+GlycanTestData*/graphs - *
+GlycanTestData*/spectra - *
+GlycanTestData*/* - additional glycans*
+GlycanTestData*/* - spectra summary*
+GlycanTestData*/*.gml
+*/.vs
+*/*/bin
+*/*/obj
