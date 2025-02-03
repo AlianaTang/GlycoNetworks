@@ -233,5 +233,62 @@ namespace GlycoNet
             }
 
         }
+
+        public List<string> FindAdditionalGlycans(List<Glycopep> glycopepList, Dictionary<Glycopep, List<Edge>> graph, List<GlycanComposition> compositions, string additionalGlycansDetailsFilename)
+        {
+            var uniqueAdditionalGlycans = new HashSet<string>();
+            using (var additionalGlycansFile = new StreamWriter(additionalGlycansDetailsFilename))
+            {
+                additionalGlycansFile.WriteLine(@"Glycan composition,Glycan mass,Cluster size,Peptide mass,Retention time");
+                bool continueIterating = true;
+                while (continueIterating)
+                {
+                    continueIterating = false;
+                    for (int i = 0; i < glycopepList.Count; i++)
+                    {
+                        if (!graph.ContainsKey(glycopepList[i])) continue;
+                        visited.Clear();
+                        dfs2(graph, glycopepList[i], Constants.tolerance, visited);
+                        if (glycopepList[i].comp != null && visited.Count >= 3)
+                        {
+                            foreach (Edge edge in graph[glycopepList[i]])
+                            {
+                                if (edge.target.comp == null)
+                                {
+                                    continueIterating = true;
+                                    edge.target.comp = GlycanComposition.toComp(edge.source.comp.toString());
+                                    edge.target.compChanged = true;
+                                    if (edge.glycDiff == "Hex-HexNAc")
+                                    {
+                                        // Hex-HexNAc disaccharide delta special case
+                                        if (!edge.target.comp.ContainsKey("Hex")) edge.target.comp.Add("Hex", 0);
+                                        if (!edge.target.comp.ContainsKey("HexNAc")) edge.target.comp.Add("HexNAc", 0);
+                                        edge.target.comp["Hex"] += edge.increasing;
+                                        edge.target.comp["HexNAc"] += edge.increasing;
+                                    }
+                                    else
+                                    {
+                                        // Monosaccharide delta
+                                        if (!edge.target.comp.ContainsKey(edge.glycDiff)) edge.target.comp.Add(edge.glycDiff, 0);
+                                        edge.target.comp[edge.glycDiff] += edge.increasing;
+                                    }
+                                    if (edge.target.comp.isValid() && !GlycanComposition.Contains(compositions, edge.target.comp))
+                                    {
+                                        string new_comp = edge.target.comp.toString();
+                                        additionalGlycansFile.WriteLine(new_comp + "," + edge.target.glycanMass + "," + visited.Count + "," + edge.target.peptideMass + "," + edge.target.rt);
+                                        uniqueAdditionalGlycans.Add(new_comp);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            List<string> sortedUniqueAdditionalGlycans = uniqueAdditionalGlycans.ToList();
+            sortedUniqueAdditionalGlycans.Sort();
+
+            return sortedUniqueAdditionalGlycans;
+        }
     }   
 }

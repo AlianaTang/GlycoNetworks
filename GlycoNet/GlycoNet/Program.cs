@@ -272,6 +272,7 @@ for (int i = 0; i < mapGlycantoPepList.Count; i++)
     uniqueGlycansGlycopepList.Add(mapGlycantoPepList[keyVal][0]);
 }
 
+// All-in-one graph is deprecated
 using (var glycanGraphFile = new StreamWriter(Path.Combine(spectraDirectory, @"glycan graph - " + spectraFileName + ".gml")))
 {
     glycanGraphFile.WriteLine("Creator \"yFiles\"\nVersion 2.2\ngraph\n[ hierarchic  1\n  directed  1  ");
@@ -325,6 +326,7 @@ using (var glycanGraphFile = new StreamWriter(Path.Combine(spectraDirectory, @"g
     glycanGraphFile.WriteLine("]");
 }
 
+// Preferred way is now based on separating by peptide
 for (int k = 0; k < mapPeptoGlycanList.Count; k++)
 {
     double keyVal = mapPeptoGlycanList.Keys.ToArray()[k];
@@ -389,59 +391,32 @@ for (int k = 0; k < mapPeptoGlycanList.Count; k++)
     }
 }
 
-var uniqueAdditionalGlycans = new HashSet<string>();
-using (var additionalGlycansFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - additional glycans - details.csv")))
+// All-in-one graph is deprecated
+List<string> additionalGlycansDeprecated = glycans.FindAdditionalGlycans(glycopepList, graph2, compositions, Path.Combine(spectraDirectory, spectraFileName + " - deprecated - additional glycans - details.csv"));
+using (var uniqueAdditionalGlycansFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - deprecated - additional glycans - summary.txt")))
 {
-    additionalGlycansFile.WriteLine(@"Glycan composition,Glycan mass,Cluster size,Peptide mass,Retention time");
-    bool continueIterating = true;
-    while (continueIterating)
+    foreach (string g in additionalGlycansDeprecated)
     {
-        continueIterating = false;
-        for (int i = 0; i < glycopepList.Count; i++)
-        {
-            glycans.visited.Clear();
-            glycans.dfs2(graph3, glycopepList[i], Constants.tolerance, glycans.visited);
-            if (glycopepList[i].comp != null && glycans.visited.Count >= 3)
-            {
-                foreach (Edge edge in graph3[glycopepList[i]])
-                {
-                    if (edge.target.comp == null)
-                    {
-                        continueIterating = true;
-                        edge.target.comp = GlycanComposition.toComp(edge.source.comp.toString());
-                        if (edge.glycDiff == "Hex-HexNAc")
-                        {
-                            // Hex-HexNAc disaccharide delta special case
-                            if (!edge.target.comp.ContainsKey("Hex")) edge.target.comp.Add("Hex", 0);
-                            if (!edge.target.comp.ContainsKey("HexNAc")) edge.target.comp.Add("HexNAc", 0);
-                            edge.target.comp["Hex"] += edge.increasing;
-                            edge.target.comp["HexNAc"] += edge.increasing;
-                        }
-                        else
-                        {
-                            // Monosaccharide delta
-                            if (!edge.target.comp.ContainsKey(edge.glycDiff)) edge.target.comp.Add(edge.glycDiff, 0);
-                            edge.target.comp[edge.glycDiff] += edge.increasing;
-                        }
-                        if (edge.target.comp.isValid() && !GlycanComposition.Contains(compositions, edge.target.comp))
-                        {
-                            string new_comp = edge.target.comp.toString();
-                            additionalGlycansFile.WriteLine(new_comp + "," + edge.target.glycanMass + "," + glycans.visited.Count + "," + edge.target.peptideMass + "," + edge.target.rt);
-                            uniqueAdditionalGlycans.Add(new_comp);
-                        }
-                    }
-                }
-            }
-        }
+        uniqueAdditionalGlycansFile.WriteLine(g);
     }
 }
 
-List<string> sortedUniqueAdditionalGlycans = uniqueAdditionalGlycans.ToList();
-sortedUniqueAdditionalGlycans.Sort();
+// Reset - i.e., undo changes made by FindAdditionalGlycans()
+foreach (Glycopep glycopep in glycopepList)
+{
+    if (glycopep.compChanged)
+    {
+        glycopep.comp = null;
+        glycopep.compChanged = false;
+    }
+}
+
+// Preferred way is now based on separating by peptide
+List<string> additionalGlycans = glycans.FindAdditionalGlycans(glycopepList, graph3, compositions, Path.Combine(spectraDirectory, spectraFileName + " - additional glycans - details.csv"));
 Console.WriteLine("Additional glycans:");
 using (var uniqueAdditionalGlycansFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - additional glycans - summary.txt")))
 {
-    foreach (string g in sortedUniqueAdditionalGlycans)
+    foreach (string g in additionalGlycans)
     {
         uniqueAdditionalGlycansFile.WriteLine(g);
         Console.WriteLine(g);

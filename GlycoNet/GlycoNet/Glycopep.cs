@@ -13,5 +13,6 @@ namespace GlycoNet
         public double glycanMass;
         public double intensity;
         public GlycanComposition comp;
+        public bool compChanged = false;
     }
 }
