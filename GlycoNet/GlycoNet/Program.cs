@@ -94,8 +94,6 @@ Console.WriteLine("Deltas: " + String.Join(",", deltas));
 Console.WriteLine();
 
 List<MS2> spectra = Utilities.readMgfAndFindGlycopeptides(Path.Combine(spectraDirectory, spectraFileName));
-Console.WriteLine("Number of spectra with glycopeptide oxonium ion and Y0, Y1, Y2, etc.: " + spectra.Count);
-Console.WriteLine();
 var glycanMasses = new List<double>();
 var glycopepList = new List<Glycopep>();  // Retention time, Charge, Precursor Mz, Precursor Mass, Peptide Mass, Glycan Mass, Intensity, [Hexes, HexNacs, Fucs, NeuAcs, NeuGcs]*
 var commonGlycans = new List<GlycInfo>();

@@ -13,7 +13,8 @@ namespace GlycoNet
     {
         public static List<MS2> readMgfAndFindGlycopeptides(string inputfilename)
         {
-            var spectra = new List<MS2>();
+            int numSpectra = 0;
+            var glycopeptideLikeSpectra = new List<MS2>();
             var spectrum = new MS2(); ;
             string line;
             using (var streamReader = new StreamReader(inputfilename))
@@ -39,13 +40,14 @@ namespace GlycoNet
                     }
                     else if (line == "END IONS")
                     {
+                        numSpectra++;
                         if (spectrum.hasGlycanOxoniumIon())
                         {
                             spectrum.sortPeaksByIntensity();
                             Point? pepMz = spectrum.findGlycopep();  // Look for pep, pep+HexNAc, pep+2HexNAc, etc. signature
                             if (pepMz != null && pepMz.mass > 0)
                             {
-                                spectra.Add(spectrum);
+                                glycopeptideLikeSpectra.Add(spectrum);
                             }
                         }
                     }
@@ -55,7 +57,11 @@ namespace GlycoNet
                     }
                 }
             }
-            return spectra;
+
+            Console.WriteLine("Number of spectra: " + numSpectra);
+            Console.WriteLine("Number of spectra with glycopeptide oxonium ion and Y0, Y1, Y2, etc.: " + glycopeptideLikeSpectra.Count + " (" + (100.0 * glycopeptideLikeSpectra.Count / numSpectra).ToString("F2") + "%)");
+            Console.WriteLine();
+            return glycopeptideLikeSpectra;
         }
 
         public static List<Glycopep> readCsv(string inputfilename)
