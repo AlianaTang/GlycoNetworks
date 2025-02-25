@@ -236,18 +236,6 @@ for (int i = 0; i < glycopepList.Count; i++)
     }
 }
 
-for (int i = 0; i < mapGlycantoPepList.Count; i++)
-{
-    for (int j = 0; j < glycopepList.Count; j++)
-    {
-        if (mapGlycantoPepList.Keys.ToArray()[i] - Constants.tolerance <= glycopepList[j].glycanMass && mapGlycantoPepList.Keys.ToArray()[i] + Constants.tolerance >= glycopepList[j].glycanMass && glycopepList[j].comp != null)
-        {
-            double keyVal = mapGlycantoPepList.Keys.ToArray()[i];
-            //mapGlycantoPepList[keyVal].comp = infoTable[j].comp;
-        }
-    }
-}
-
 for (int i = 0; i < mapPeptoGlycanList.Count; i++)
 {
     double keyVal = mapPeptoGlycanList.Keys.ToArray()[i];
@@ -390,6 +378,8 @@ for (int k = 0; k < mapPeptoGlycanList.Count; k++)
 }
 
 // All-in-one graph is deprecated
+
+/*
 List<string> additionalGlycansDeprecated = glycans.FindAdditionalGlycans(glycopepList, graph2, compositions, Path.Combine(spectraDirectory, spectraFileName + " - deprecated - additional glycans - details.csv"));
 using (var uniqueAdditionalGlycansFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - deprecated - additional glycans - summary.txt")))
 {
@@ -398,6 +388,7 @@ using (var uniqueAdditionalGlycansFile = new StreamWriter(Path.Combine(spectraDi
         uniqueAdditionalGlycansFile.WriteLine(g);
     }
 }
+*/
 
 // Reset - i.e., undo changes made by FindAdditionalGlycans()
 foreach (Glycopep glycopep in glycopepList)
