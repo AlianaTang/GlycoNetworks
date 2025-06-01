@@ -377,9 +377,8 @@ for (int k = 0; k < mapPeptoGlycanList.Count; k++)
     }
 }
 
-// All-in-one graph is deprecated
-
 /*
+// All-in-one graph is deprecated
 List<string> additionalGlycansDeprecated = glycans.FindAdditionalGlycans(glycopepList, graph2, compositions, Path.Combine(spectraDirectory, spectraFileName + " - deprecated - additional glycans - details.csv"));
 using (var uniqueAdditionalGlycansFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - deprecated - additional glycans - summary.txt")))
 {
@@ -405,10 +404,20 @@ List<string> additionalGlycans = glycans.FindAdditionalGlycans(glycopepList, gra
 Console.WriteLine("Additional glycans:");
 using (var uniqueAdditionalGlycansFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - additional glycans - summary.txt")))
 {
-    foreach (string g in additionalGlycans)
+    using (var byonicModificationsFineControlFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - additional glycans - Byonic modifications fine control.txt")))
     {
-        uniqueAdditionalGlycansFile.WriteLine(g);
-        Console.WriteLine(g);
+        using (var byonicColumnFilterFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - additional glycans - Byonic column filter.cft")))
+        {
+            byonicColumnFilterFile.Write("""{"application":"byos","author":"GlycoNet","column_filters":[{"column":"","id":"","operator":"Script","value":"var x = Column.value(\"Glycans\"); return """);
+            foreach (string g in additionalGlycans)
+            {
+                uniqueAdditionalGlycansFile.WriteLine(g);
+                byonicModificationsFineControlFile.WriteLine(g + " @ NGlycan | rare1");
+                byonicColumnFilterFile.Write(@"x == \""" + g + @"\"" || ");
+                Console.WriteLine(g);
+            }
+            byonicColumnFilterFile.Write("""false;"}],"created":"2025-02-14T15:21:00","name":"Additional glycans filter","table":"Peptides","textFilter":"","type":"Standard","version":1}""");
+        }
     }
 }
 
