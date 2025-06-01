@@ -70,5 +70,15 @@ namespace GlycoNet
             }
             return false;
         }
+
+        public static bool ContainsMassMatch(List<GlycanComposition> list, GlycanComposition x)
+        {
+            var compareGlycan = new CompareGlycan();
+            foreach (GlycanComposition listItem in list)
+            {
+                if (Math.Abs(compareGlycan.calcMass(x) - compareGlycan.calcMass(listItem)) < 0.00001) return true;
+            }
+            return false;
+        }
     }
 }

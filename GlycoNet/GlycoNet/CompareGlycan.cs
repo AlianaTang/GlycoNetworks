@@ -236,10 +236,10 @@ namespace GlycoNet
 
         public List<string> FindAdditionalGlycans(List<Glycopep> glycopepList, Dictionary<Glycopep, List<Edge>> graph, List<GlycanComposition> compositions, string additionalGlycansDetailsFilename)
         {
-            var uniqueAdditionalGlycans = new HashSet<string>();
-            using (var additionalGlycansFile = new StreamWriter(additionalGlycansDetailsFilename))
+            var additionalGlycans = new List<GlycanComposition>();
+            using (var additionalGlycansDetailsFile = new StreamWriter(additionalGlycansDetailsFilename))
             {
-                additionalGlycansFile.WriteLine(@"Glycan composition,Glycan mass,Cluster size,Peptide mass,Retention time");
+                additionalGlycansDetailsFile.WriteLine(@"Glycan composition,Glycan mass,Cluster size,Peptide mass,Retention time");
                 bool continueIterating = true;
                 while (continueIterating)
                 {
@@ -272,11 +272,10 @@ namespace GlycoNet
                                         if (!edge.target.comp.ContainsKey(edge.glycDiff)) edge.target.comp.Add(edge.glycDiff, 0);
                                         edge.target.comp[edge.glycDiff] += edge.increasing;
                                     }
-                                    if (edge.target.comp.isValid() && !GlycanComposition.Contains(compositions, edge.target.comp))
+                                    if (edge.target.comp.isValid() && !GlycanComposition.ContainsMassMatch(compositions, edge.target.comp) && !GlycanComposition.ContainsMassMatch(additionalGlycans, edge.target.comp))
                                     {
-                                        string new_comp = edge.target.comp.toString();
-                                        additionalGlycansFile.WriteLine(new_comp + "," + edge.target.glycanMass + "," + visited.Count + "," + edge.target.peptideMass + "," + edge.target.rt);
-                                        uniqueAdditionalGlycans.Add(new_comp);
+                                        additionalGlycansDetailsFile.WriteLine(edge.target.comp.toString() + "," + edge.target.glycanMass + "," + visited.Count + "," + edge.target.peptideMass + "," + edge.target.rt);
+                                        additionalGlycans.Add(edge.target.comp);
                                     }
                                 }
                             }
@@ -285,10 +284,14 @@ namespace GlycoNet
                 }
             }
 
-            List<string> sortedUniqueAdditionalGlycans = uniqueAdditionalGlycans.ToList();
-            sortedUniqueAdditionalGlycans.Sort();
+            var additionalGlycansAsString = new List<string>();
+            foreach (var additionalGlycan in additionalGlycans)
+            {
+                additionalGlycansAsString.Add(additionalGlycan.toString());
+            }
+            additionalGlycansAsString.Sort();
 
-            return sortedUniqueAdditionalGlycans;
+            return additionalGlycansAsString;
         }
     }   
 }
