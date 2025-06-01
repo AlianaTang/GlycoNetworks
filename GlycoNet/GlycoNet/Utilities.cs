@@ -126,7 +126,7 @@ namespace GlycoNet
                 if (Array.Exists(data.ToArray(), ele => ele.mass >= peak - i * Constants.isotopeSpacing / charge - Constants.tolerance && ele.mass <= peak - i * Constants.isotopeSpacing / charge + Constants.tolerance))
                 {
                     Point next_peak = Array.Find(data.ToArray(), ele => ele.mass >= peak - i * Constants.isotopeSpacing / charge - Constants.tolerance && ele.mass <= peak - i * Constants.isotopeSpacing / charge + Constants.tolerance);
-                    if (current_peak.intensity / next_peak.intensity <= 10)
+                    if (current_peak.intensity / next_peak.intensity <= 4)
                     {
                         current_peak = next_peak;
                         i++;
