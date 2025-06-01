@@ -12,7 +12,7 @@ Usage: GlycoNet <Spectra file path> <Glycan database file path> [Mass tolerance]
   <Spectra file path> is mandatory. Must be in MGF format, or ConvertToMgf.bat must be configured to convert to MGF format
   <Glycan database file path> is mandatory. Must be a text file of glycan compositions
   [Mass tolerance] is optional. Default is: 0.02
-  [Deltas] is optional. List of glycan deltas to consider, separated by commas
+  [Deltas] is optional. List of glycan deltas to consider, separated by commas. You may also specify a delta mass
     Default is: all building blocks found in the glycan database, along with the disaccharide Hex-HexNAc
     This program knows the following deltas: Hex,HexNAc,Fuc,NeuAc,NeuGc,Pent,Phospho,Na,Acetyl,Hex-HexNAc
   ```

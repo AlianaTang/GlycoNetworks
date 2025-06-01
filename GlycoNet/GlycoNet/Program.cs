@@ -12,7 +12,7 @@ if (args.Length < 2 || args.Length > 4)
     Console.WriteLine("  <Spectra file path> is mandatory. Must be in MGF format, or ConvertToMgf.bat must be configured to convert to MGF format");
     Console.WriteLine("  <Glycan database file path> is mandatory. Must be a text file of glycan compositions");
     Console.WriteLine("  [Mass tolerance] is optional. Default is: " + defaultMassTolerance);
-    Console.WriteLine("  [Deltas] is optional. List of glycan deltas to consider, separated by commas");
+    Console.WriteLine("  [Deltas] is optional. List of glycan deltas to consider, separated by commas. You may also specify a delta mass");
     Console.WriteLine("    Default is: all building blocks found in the glycan database, along with the disaccharide Hex-HexNAc");
     Console.WriteLine("    This program knows the following deltas: " + String.Join(",", Constants.glycan_masses.Keys));
     return;
@@ -60,8 +60,16 @@ if (args.Length >= 4)
     {
         if (!Constants.glycan_masses.ContainsKey(delta))
         {
-            Console.WriteLine("Error: Invalid delta");
-            return;
+            double x;
+            if (Double.TryParse(delta, out x))
+            {
+                Constants.glycan_masses.Add(delta, x);  // Quick hack to enable deltas of arbitrary mass (but abuses the meaning of "Constants")
+            }
+            else
+            {
+                Console.WriteLine("Error: Invalid delta");
+                return;
+            }
         }
     }
 }
