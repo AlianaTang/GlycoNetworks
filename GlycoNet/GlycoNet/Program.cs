@@ -60,10 +60,11 @@ if (args.Length >= 4)
     {
         if (!Constants.glycan_masses.ContainsKey(delta))
         {
-            double x;
-            if (Double.TryParse(delta, out x))
+            // In addition to pre-defined deltas, such as Hex or HexNAc, allow deltas of arbitrary mass (user must enter as floating point number)
+            double num;
+            if (Double.TryParse(delta, out num) && num != 0)
             {
-                Constants.glycan_masses.Add(delta, x);  // Quick hack to enable deltas of arbitrary mass (but abuses the meaning of "Constants")
+                Constants.glycan_masses.Add(delta, num);
             }
             else
             {
