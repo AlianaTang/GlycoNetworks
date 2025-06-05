@@ -417,7 +417,7 @@ using (var uniqueAdditionalGlycansFile = new StreamWriter(Path.Combine(spectraDi
     {
         using (var byonicColumnFilterFile = new StreamWriter(Path.Combine(spectraDirectory, spectraFileName + " - additional glycans - Byonic column filter.cft")))
         {
-            byonicColumnFilterFile.Write("""{"application":"byos","author":"GlycoNet","column_filters":[{"column":"","id":"","operator":"Script","value":"var x = Column.value(\"Glycans\"); return """);
+            byonicColumnFilterFile.Write("""{"application":"byos","author":"GlycoNetworks","column_filters":[{"column":"","id":"","operator":"Script","value":"var x = Column.value(\"Glycans\"); return """);
             foreach (string g in additionalGlycans)
             {
                 uniqueAdditionalGlycansFile.WriteLine(g);
