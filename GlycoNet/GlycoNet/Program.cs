@@ -1,6 +1,6 @@
 ﻿// © 2024 Aliana Tang <alianatang17@gmail.com>
 
-using GlycoNet;
+using GlycoNetworks;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -8,7 +8,7 @@ const double defaultMassTolerance = 0.02;
 
 if (args.Length < 2 || args.Length > 4)
 {
-    Console.WriteLine("Usage: GlycoNet <Spectra file path> <Glycan database file path> [Mass tolerance] [Deltas]");
+    Console.WriteLine("Usage: GlycoNetworks <Spectra file path> <Glycan database file path> [Mass tolerance] [Deltas]");
     Console.WriteLine("  <Spectra file path> is mandatory. Must be in MGF format, or ConvertToMgf.bat must be configured to convert to MGF format");
     Console.WriteLine("  <Glycan database file path> is mandatory. Must be a text file of glycan compositions");
     Console.WriteLine("  [Mass tolerance] is optional. Default is: " + defaultMassTolerance);

@@ -1,6 +1,6 @@
 ﻿// © 2024 Aliana Tang <alianatang17@gmail.com>
 
-namespace GlycoNet
+namespace GlycoNetworks
 {
     internal class Glycopep
     {
