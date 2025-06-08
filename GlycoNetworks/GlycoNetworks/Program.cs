@@ -1,4 +1,4 @@
-﻿// © 2024 Aliana Tang <alianatang17@gmail.com>
+﻿// © 2024, 2025 Aliana Tang <alianatang17@gmail.com>
 
 using GlycoNetworks;
 using System.Collections.Generic;
