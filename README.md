@@ -2,7 +2,7 @@ Glycosylation is critical to many biological processes, such as protein folding 
 
 GlycoNetworks builds improved N-glycan databases by constructing a sample-specific glycan database based on the mass spectrometry data itself, rather than relying solely on existing glycan databases. GlycoNetworks reads in mass spectrometry data and an initial (seed) glycan database. Then it analyzes the data to augment the initial glycan database with additional glycans. Rather than analyzing individual spectra in isolation, GlycoNetworks constructs a network (graph) of putative glycans where each node represents a glycan and each edge represents a monosaccharide.
 
-More details can be found in the paper "Network method for building a sample-specific glycan database for N-linked glycosylation from MS/MS data."
+More details can be found in the paper ["Network method for building a sample-specific glycan database for N-linked glycosylation from MS/MS data."](https://doi.org/10.1021/acs.jproteome.5c00006)
 
 ## Usage summary
 
