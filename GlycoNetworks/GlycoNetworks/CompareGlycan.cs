@@ -60,7 +60,7 @@ namespace GlycoNetworks
             return edge_code;
         }
 
-        public void dfs2(Dictionary<Glycopep, List<Edge>> graph, Glycopep node, double tolerance, List<Glycopep> visited)
+        public void dfs(Dictionary<Glycopep, List<Edge>> graph, Glycopep node, double tolerance, List<Glycopep> visited)
         {
             visited.Add(node);
             //Console.WriteLine(node.glycanMass);
@@ -69,7 +69,7 @@ namespace GlycoNetworks
                 if (!visited.Contains(neighbor.target))
                 {
                     //Console.WriteLine("Hello World");
-                    dfs2(graph, neighbor.target, tolerance, visited);
+                    dfs(graph, neighbor.target, tolerance, visited);
                 }
             }
 
@@ -89,7 +89,7 @@ namespace GlycoNetworks
                     {
                         if (!graph.ContainsKey(glycopepList[i])) continue;
                         visited.Clear();
-                        dfs2(graph, glycopepList[i], Constants.tolerance, visited);
+                        dfs(graph, glycopepList[i], Constants.tolerance, visited);
                         if (glycopepList[i].comp != null && visited.Count >= 3)
                         {
                             foreach (Edge edge in graph[glycopepList[i]])
