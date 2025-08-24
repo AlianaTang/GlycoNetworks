@@ -108,7 +108,7 @@ var glycopepList = new List<Glycopep>();  // Retention time, Charge, Precursor M
 var commonGlycans = new List<GlycInfo>();
 
 var mapGlycantoPepList = new Dictionary<double, List<Glycopep>>(); //glycmass, list of pepmasses
-var mapPeptoGlycanList = new Dictionary<double, List<Glycopep>>(); //used to be double, PepInfo2
+var mapPeptoGlycanList = new Dictionary<double, List<Glycopep>>();
 
 var uniqueGlycansGlycopepList = new List<Glycopep>();
 
